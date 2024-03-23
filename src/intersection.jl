@@ -19,3 +19,19 @@ function intersection(t::ProjectedTrack)
         return t(τ)
     end
 end
+
+
+function interaction(t::ProjectedTrack, s::SiliconSensor)
+    sz_x, sz_y, _ = sensordims(s)
+    px_x, px_y = pixeldims(s)
+    ip_x, ip_y, _ = intersection(t)
+
+    if !(0 < ip_x < sz_x) || !(0 < ip_y < sz_y)
+        return missing
+    end
+
+    x = (ip_x ÷ px_x) * px_x + px_x/2
+    y = (ip_y ÷ px_y) * px_y + px_y/2
+
+    return Hit(Cluster(x, px_x), Cluster(y, px_y))
+end
