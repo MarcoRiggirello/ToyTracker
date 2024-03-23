@@ -1,20 +1,19 @@
 # Marco Riggirello
 
-*(p::Pose, c::LocalVector) = GlobalVector(p * c)
+Base.:*(p::Pose, c::LocalVector) = GlobalVector(SMatrix(p) * SVector(c))
 
-*(p::Pose, c::GlobalVector) = LocalVector(p * c)
-
-function inv(p::Pose)
-    r = SA[
-        p.rotxx p.rotyx p.rotzx
-        p.rotxy p.rotyy p.rotzy
-        p.rotxz p.rotyz p.rotzz
-    ]
-    t = SA[p.trasx, p.trasy, p.trasz]
-    q = SA[
-        r     -(r*t)
-        0 0 0      1
-    ]
-    return Pose(q)
+function Base.inv(p::Pose)
+    dx = p.rotxx * p.trasx + p.rotyx * p.trasy + p.rotzx * p.trasz
+    dy = p.rotxy * p.trasx + p.rotyy * p.trasy + p.rotzy * p.trasz
+    dz = p.rotxz * p.trasx + p.rotyz * p.trasy + p.rotzz * p.trasz
+    return Pose(
+        SA[
+            p.rotxx p.rotyx p.rotzx -dx
+            p.rotxy p.rotyy p.rotzy -dy
+            p.rotxz p.rotyz p.rotzz -dz
+            0       0       0         1
+        ]
+    )
 end
 
+Base.:\(p::Pose, c::GlobalVector) = LocalVector(inv(p) * c) 

@@ -27,10 +27,21 @@ for frame in [:Local, :Global]
         $FrameVec(a::T, b::T, c::T) where {T} = $FrameVec{T}(a, b, c, one(T))
 
         $FrameVec(a, b, c) = $FrameVec(promote(a, b, c)...)
-        $FrameVec(b::AbstractVector) = $FrameVec(b...)
-
+        $FrameVec(a::StaticArray{S, T, 1} where {S<:Tuple, T}) = $FrameVec(a...)
     end
 end
+
+
+"""
+Vector of homogenous coordinates in the global refernce frame.
+"""
+GlobalVector
+
+
+"""
+Vector of homogenous coordinates in a local reference frame.
+"""
+LocalVector
 
 
 """
@@ -75,7 +86,7 @@ Pose(a::T...) where {T} = Pose{T}(a...)
 Pose(a...) = Pose(promote(a...)...)
 
 
-Pose(a::AbstractMatrix) = Pose(a...)
+Pose(a::StaticArray{S, T, 2} where {S<:Tuple, T}) = Pose(a...)
 
 
 """
