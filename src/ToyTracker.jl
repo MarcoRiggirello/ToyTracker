@@ -8,5 +8,6 @@ include("geometry_types.jl")
 include("tracker_types.jl")
 include("utils.jl")
 include("geometry.jl")
+include("intersection.jl")
 
 end # module ToyTracker

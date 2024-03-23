@@ -1,47 +1,57 @@
 # Marco Riggirello
 
-# Inspired by the coding style of Rotations.jl
-for frame in [:Local, :Global]
-    FrameVec = Symbol(frame, :Vector)
-    x = frame == :Global ? :x : :u 
-    y = frame == :Global ? :y : :v 
-    z = frame == :Global ? :z : :w 
-    @eval begin
-        struct $FrameVec{T} <: FieldVector{4,T}
-            $x::T
-            $y::T
-            $z::T
-            unity::T
-            function $FrameVec{T}(a, b, c, d) where {T}
-                if !(d ≈ 1)
-                    @warn "The 4th element of the input vector is not close to 1 as expected for a $FrameVec. That element will be discarded."
-                end
-                return new{T}(a, b, c, one(T))
-            end
-        end
-
-        $FrameVec(a::T, b::T, c::T, d::T) where {T} = $FrameVec{T}(a, b, c, d)
-        $FrameVec(a, b, c, d) = $FrameVec(promote(a, b, c, d)...)
-
-        $FrameVec{T}(a, b, c) where {T} = $FrameVec{T}(a, b, c, one(T))
-        $FrameVec(a::T, b::T, c::T) where {T} = $FrameVec{T}(a, b, c, one(T))
-
-        $FrameVec(a, b, c) = $FrameVec(promote(a, b, c)...)
-        $FrameVec(a::StaticArray{S, T, 1} where {S<:Tuple, T}) = $FrameVec(a...)
-    end
-end
-
 
 """
 Vector of homogenous coordinates in the global refernce frame.
 """
-GlobalVector
+struct GlobalVector{T} <: FieldVector{4,T}
+    x::T
+    y::T
+    z::T
+    unity::T
+    function GlobalVector{T}(a, b, c, d) where {T}
+        if !(d ≈ 1)
+            @warn "The 4th element of the input vector is not close to 1 as expected for a GlobalVector. That element will be discarded."
+        end
+        return new{T}(a, b, c, one(T))
+    end
+end
+
+GlobalVector(a::T, b::T, c::T, d::T) where {T} = GlobalVector{T}(a, b, c, d)
+GlobalVector(a, b, c, d) = GlobalVector(promote(a, b, c, d)...)
+
+GlobalVector{T}(a, b, c) where {T} = GlobalVector{T}(a, b, c, one(T))
+GlobalVector(a::T, b::T, c::T) where {T} = GlobalVector{T}(a, b, c, one(T))
+
+GlobalVector(a, b, c) = GlobalVector(promote(a, b, c)...)
+GlobalVector(a::StaticArray{S, T, 1} where {S<:Tuple, T}) = GlobalVector(a...)
 
 
 """
 Vector of homogenous coordinates in a local reference frame.
 """
-LocalVector
+struct LocalVector{T} <: FieldVector{4,T}
+    u::T
+    v::T
+    w::T
+    unity::T
+    function LocalVector{T}(a, b, c, d) where {T}
+        if !(d ≈ 1)
+            @warn "The 4th element of the input vector is not close to 1 as expected for a LocalVector. That element will be discarded."
+        end
+        return new{T}(a, b, c, one(T))
+    end
+end
+
+LocalVector(a::T, b::T, c::T, d::T) where {T} = LocalVector{T}(a, b, c, d)
+LocalVector(a, b, c, d) = LocalVector(promote(a, b, c, d)...)
+
+LocalVector{T}(a, b, c) where {T} = LocalVector{T}(a, b, c, one(T))
+LocalVector(a::T, b::T, c::T) where {T} = LocalVector{T}(a, b, c, one(T))
+
+LocalVector(a, b, c) = LocalVector(promote(a, b, c)...)
+LocalVector(a::StaticArray{S, T, 1} where {S<:Tuple, T}) = LocalVector(a...)
+
 
 
 """
