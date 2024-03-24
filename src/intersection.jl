@@ -35,3 +35,23 @@ function interaction(t::ProjectedTrack, s::SiliconSensor)
 
     return Hit(Cluster(x, px_x), Cluster(y, px_y))
 end
+
+
+function interaction(t::ParticleTrack, s::PlacedSensor)
+    tt = project(t, s)
+    ss = sensor(s)
+    return interaction(tt, ss)
+end
+
+
+function interaction(t::ParticleTrack, d::Tracker)
+    hits = Dict{String, Hit}()
+    for s in sensors(d) 
+        id = s.first
+        ss = s.second
+        ht = interaction(t, ss)
+        push!(hits, id => ht)
+    end
+    return hits
+end
+

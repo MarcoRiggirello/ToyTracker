@@ -17,6 +17,11 @@ function position(s::PlacedSensor)
     return s.position
 end
 
+
+function sensors(t::Tracker)
+    return t.sensors
+end
+
 position0(t::ParticleTrack) = t.position0
 direction(t::ParticleTrack) = t.direction
 
