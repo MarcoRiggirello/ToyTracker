@@ -45,7 +45,7 @@ end
 
 
 function interaction(t::ParticleTrack, d::Tracker)
-    hits = Dict{String, Hit}()
+    hits = Dict{String, Union{Hit, Missing}}()
     for s in sensors(d) 
         id = s.first
         ss = s.second

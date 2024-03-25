@@ -10,4 +10,11 @@ include("utils.jl")
 include("geometry.jl")
 include("intersection.jl")
 
+export GlobalVector, Pose
+export ParticleTrack
+export SiliconSensor, PlacedSensor, Tracker
+export Cluster, Hit
+
+export interaction
+
 end # module ToyTracker

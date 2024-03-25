@@ -6,29 +6,29 @@ Simple struct to model basic properties of a silicon tracker sensor.
 
 Each size should be in mm (TODO ensure that indeed this is the case). 
 """
-struct SiliconSensor
-    xwidth::Real
-    ywidth::Real
-    xpitch::Real
-    ypitch::Real
-    thickness::Real
+struct SiliconSensor{T}
+    xwidth::T
+    ywidth::T
+    xpitch::T
+    ypitch::T
+    thickness::T
 end
 
 
 """
 A Silicon Sensor plus the (active) transformation that describe its position in the global reference frame.
 """
-struct PlacedSensor
-    sensor::SiliconSensor
-    position::Pose
+struct PlacedSensor{T}
+    sensor::SiliconSensor{T}
+    position::Pose{T}
 end
 
 
 """
 Collection of SiliconSensors and their position in the global reference frame.
 """
-struct Tracker
-    sensors::Dict{String,PlacedSensor}
+struct Tracker{T}
+    sensors::Dict{String,PlacedSensor{T}}
 end
 
 
@@ -38,16 +38,22 @@ A straight track.
 Each vector element should be in mm (TODO ensure that indeed this is the case). 
 """
 struct ParticleTrack{T}
-    direction::GlobalVector{T}
+    direction::GlobalDirection{T}
     position0::GlobalVector{T}
 end
 
+
+ParticleTrack{T}(mx, my, x0, y0) where {T} = ParticleTrack{T}(GlobalDirection{T}(mx, my, 1.), GlobalVector{T}(x0, y0, 0.))
+
+ParticleTrack(mx::T, my::T, x0::T, y0::T) where {T} = ParticleTrack{T}(mx, my, x0, y0)
+
+ParticleTrack(mx, my, x0, y0) = ParticleTrack(promote(mx, my, x0, y0)...)
 
 """
 A straight track in the reference frame of a PlacedSensor.
 """
 struct ProjectedTrack{T}
-    direction::LocalVector{T}
+    direction::LocalDirection{T}
     position0::LocalVector{T}
 end
 

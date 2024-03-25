@@ -55,6 +55,60 @@ LocalVector(a::StaticArray{S, T, 1} where {S<:Tuple, T}) = LocalVector(a...)
 
 
 """
+Direction vector in a global reference frame.
+"""
+struct GlobalDirection{T} <: FieldVector{4,T}
+    x::T
+    y::T
+    z::T
+    unity::T
+    function GlobalDirection{T}(a, b, c, d) where {T}
+        if !(d ≈ 1)
+            @warn "The 4th element of the input vector is not close to 1 as expected for a GlobalDirection. That element will be discarded."
+        end
+        return new{T}(a, b, c, one(T))
+    end
+end
+
+GlobalDirection(a::T, b::T, c::T, d::T) where {T} = GlobalDirection{T}(a, b, c, d)
+GlobalDirection(a, b, c, d) = GlobalDirection(promote(a, b, c, d)...)
+
+GlobalDirection{T}(a, b, c) where {T} = GlobalDirection{T}(a, b, c, one(T))
+GlobalDirection(a::T, b::T, c::T) where {T} = GlobalDirection{T}(a, b, c, one(T))
+
+GlobalDirection(a, b, c) = GlobalDirection(promote(a, b, c)...)
+GlobalDirection(a::StaticArray{S, T, 1} where {S<:Tuple, T}) = GlobalDirection(a...)
+
+
+
+"""
+Direction vector in a local reference frame.
+"""
+struct LocalDirection{T} <: FieldVector{4,T}
+    u::T
+    v::T
+    w::T
+    unity::T
+    function LocalDirection{T}(a, b, c, d) where {T}
+        if !(d ≈ 1)
+            @warn "The 4th element of the input vector is not close to 1 as expected for a LocalDirection. That element will be discarded."
+        end
+        return new{T}(a, b, c, one(T))
+    end
+end
+
+LocalDirection(a::T, b::T, c::T, d::T) where {T} = LocalDirection{T}(a, b, c, d)
+LocalDirection(a, b, c, d) = LocalDirection(promote(a, b, c, d)...)
+
+LocalDirection{T}(a, b, c) where {T} = LocalDirection{T}(a, b, c, one(T))
+LocalDirection(a::T, b::T, c::T) where {T} = LocalDirection{T}(a, b, c, one(T))
+
+LocalDirection(a, b, c) = LocalDirection(promote(a, b, c)...)
+LocalDirection(a::StaticArray{S, T, 1} where {S<:Tuple, T}) = LocalDirection(a...)
+
+
+
+"""
 A pose as defined in "A tutorial on SE(3) transformation parameterizations and on-manifold optimization", J. Blanco, 2010.
 """
 struct Pose{T} <: FieldMatrix{4, 4, T}
