@@ -79,26 +79,117 @@ struct Pose{T} <: FieldMatrix{4,4,T}
     trasy::T
     trasz::T
     unity::T
-    function Pose{T}(xx, yx, zx, xy, yy, zy, xz, yz, zz, xt, yt, zt) where {T}
+    function Pose{T}(
+        xx, yx, zx, # CAVE! The "graphical"
+        xy, yy, zy, # order of the elements
+        xz, yz, zz, # is transposed w.r.t.
+        xt, yt, zt  # the true order!!!
+    ) where {T}
         return new{T}(
-            xx, xy, xz, xt,
-            yx, yy, yz, yt,
-            zx, zy, zz, zt,
+            xx, xy, xz, xt, # See?
+            yx, yy, yz, yt, # This is the
+            zx, zy, zz, zt, # true ordering!!!
             zero(T), zero(T), zero(T), oneunit(T)
         )
     end
 end
-#    function Pose{T}(xx, yx, zx, tx, xy, yy, zy, ty, xz, yz, zz, tz, xt, yt, zt, tt) where {T<:AbstractFloat}
 
-Pose(a::T...) where {T} = Pose{T}(a...)
+# Twelve elements constructors
+function Pose(
+    xx::T, yx::T, zx::T, # CAVE! The "graphical"
+    xy::T, yy::T, zy::T, # order of the elements
+    xz::T, yz::T, zz::T, # is transposed w.r.t.
+    xt::T, yt::T, zt::T  # the true order!!!
+) where {T}
+    return Pose{T}(
+        xx, yx, zx, # CAVE! The "graphical"
+        xy, yy, zy, # order of the elements
+        xz, yz, zz, # is transposed w.r.t.
+        xt, yt, zt  # the true order!!!
+    )
+end
+
+function Pose(
+    xx, yx, zx, # CAVE! The "graphical"
+    xy, yy, zy, # order of the elements
+    xz, yz, zz, # is transposed w.r.t.
+    xt, yt, zt  # the true order!!!
+)
+    return Pose(
+        promote(
+            xx, yx, zx, # CAVE! The "graphical"
+            xy, yy, zy, # order of the elements
+            xz, yz, zz, # is transposed w.r.t.
+            xt, yt, zt  # the true order!!!
+        )...
+    )
+end
+
+# Sixteen elements constructors
+function Pose{T}(
+    xx, yx, zx, tx, # CAVE! The "graphical"
+    xy, yy, zy, ty, # order of the elements
+    xz, yz, zz, tz, # is transposed w.r.t.
+    xt, yt, zt, tt  # the true order!!!
+) where {T}
+    if tx ≉ zero(T)
+        @warn "tx element was not zero as expected. I'm gonna discard it..."
+    elseif ty ≉ zero(T)
+        @warn "ty element was not zero as expected. I'm gonna discard it..."
+    elseif tz ≉ zero(T)
+        @warn "tz element was not zero as expected. I'm gonna discard it..."
+    elseif tt ≉ oneunit(T)
+        @warn "tt element was not unitary as expected. I'm gonna discard it..."
+    end
+    return Pose{T}(
+        xx, yx, zx, # CAVE! The "graphical"
+        xy, yy, zy, # order of the elements
+        xz, yz, zz, # is transposed w.r.t.
+        xt, yt, zt  # the true order!!!
+    )
+end
+
+function Pose{T}(
+    xx::T, yx::T, zx::T, tx::T, # CAVE! The "graphical"
+    xy::T, yy::T, zy::T, ty::T, # order of the elements
+    xz::T, yz::T, zz::T, tz::T, # is transposed w.r.t.
+    xt::T, yt::T, zt::T, tt::T  # the true order!!!
+) where {T}
+    return Pose{T}(
+        xx, yx, zx, tx, # CAVE! The "graphical"
+        xy, yy, zy, ty, # order of the elements
+        xz, yz, zz, tz, # is transposed w.r.t.
+        xt, yt, zt, tt  # the true order!!!
+    )
+end
+
+function Pose(
+    xx, yx, zx, tx, # CAVE! The "graphical"
+    xy, yy, zy, ty, # order of the elements
+    xz, yz, zz, tz, # is transposed w.r.t.
+    xt, yt, zt, tt  # the true order!!!
+)
+    return Pose(
+        promote(
+            xx, yx, zx, tx, # CAVE! The "graphical"
+            xy, yy, zy, ty, # order of the elements
+            xz, yz, zz, tz, # is transposed w.r.t.
+            xt, yt, zt, tt  # the true order!!!
+        )...
+    )
+end
+
+# Matrix constructors
+function Pose{T}(a::AbstractMatrix) where {T}
+    return Pose{T}(a...)
+end
+
+function Pose(a::AbstractMatrix)
+    return Pose(a...)
+end
 
 
-Pose(a...) = Pose(promote(a...)...)
-
-
-Pose(a::StaticArray{S,T,2} where {S<:Tuple,T}) = Pose(a...)
-
-
+# Parametric constructors
 """
 The three angles ϕ, χ, ψ are respectively the three Cardan angles called yaw, pitch, roll.
 """
@@ -106,21 +197,31 @@ function Pose{T}(x, y, z, ϕ, χ, ψ) where {T<:AbstractFloat}
     s₁, c₁ = sincos(ϕ)
     s₂, c₂ = sincos(χ)
     s₃, c₃ = sincos(ψ)
+    # This is the right order
+    # c₁*c₂ c₁*s₂*s₃-c₃*s₁ s₁*s₃+c₁*c₃*s₂ x
+    # c₂*s₁ c₁*c₃+s₁*s₂*s₃ c₃*s₁*s₂-c₁*s₃ y
+    # -s₂ c₂*s₃ c₂*c₃ z
+    # zero(T) zero(T) zero(T) one(T)
+    xx = c₁ * c₂
+    yx = c₂ * s₁
+    zx = -s₂
+    xy = c₁ * s₂ * s₃ - c₃ * s₁
+    yy = c₁ * c₃ + s₁ * s₂ * s₃
+    zy = c₂ * s₃
+    xz = s₁ * s₃ + c₁ * c₃ * s₂
+    yz = c₃ * s₁ * s₂ - c₁ * s₃
+    zz = c₂ * c₃
+    xt = x
+    yt = y
+    zt = z
     return Pose{T}(
-        SA[
-            c₁*c₂ c₁*s₂*s₃-c₃*s₁ s₁*s₃+c₁*c₃*s₂ x
-            c₂*s₁ c₁*c₃+s₁*s₂*s₃ c₃*s₁*s₂-c₁*s₃ y
-            -s₂ c₂*s₃ c₂*c₃ z
-            zero(T) zero(T) zero(T) one(T)
-        ]
+        xx, yx, zx, # CAVE! The "graphical"
+        xy, yy, zy, # order of the elements
+        xz, yz, zz, # is transposed w.r.t.
+        xt, yt, zt  # the true order!!!
     )
 end
 
 
 Pose(x::T, y::T, z::T, ϕ::T, χ::T, ψ::T) where {T} = Pose{T}(x, y, z, ϕ, χ, ψ)
-
-
 Pose(x, y, z, ϕ, χ, ψ) = Pose(promote(x, y, z, ϕ, χ, ψ)...)
-
-
-Pose(x::Integer, y::Integer, z::Integer, ϕ::Integer, χ::Integer, ψ::Integer) = Pose{Float64}(x, y, z, ϕ, χ, ψ)
