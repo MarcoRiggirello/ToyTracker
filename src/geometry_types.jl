@@ -1,6 +1,8 @@
 # Marco Riggirello
 
-
+#############################
+# Coordinates and Direction #
+#############################
 
 for name in (:GlobalCoordinates, :LocalCoordinates, :GlobalDirection, :LocalDirection)
     string_name = String(name)
@@ -58,6 +60,20 @@ for name in (:GlobalCoordinates, :LocalCoordinates, :GlobalDirection, :LocalDire
     end
 end
 
+###################
+# POSE DEFINITION #
+###################
+# To avoid too long lines and too long columns of arguments,
+# the elements of the matrix are arranged in a 3(4) by 4 grid.
+# However, since arrays in Julia are _column major_,
+# this creates a difference between how elements are ordered
+# in the function argument visually TRANSPOSED with respect
+# to the actual position in the very matrix. This should not
+# be an issue since I expect to construct poses from the
+# angles and translations, but I can foresee dramatic silent
+# bugs from this choice. Let's be paranoid and add warning
+# comments all over the code and let's hope that this and good
+# testing prevents alignment apocalypses...
 
 """
 A pose as defined in "A tutorial on SE(3) transformation parameterizations and on-manifold optimization", J. Blanco, 2010.
