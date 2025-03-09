@@ -9,9 +9,11 @@ include("geometry_types.jl")
 include("track_types.jl")
 include("display.jl")
 #include("utils.jl")
-#include("geometry.jl")
+include("geometry.jl")
 #include("intersection.jl")
 
+export LocalCoordinates, GlobalCoordinates
+export LocalDirection, GlobalDirection
 export Pose
 export StraightTrack
 #export SiliconSensor, PlacedSensor, Tracker
