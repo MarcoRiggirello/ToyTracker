@@ -245,7 +245,10 @@ function Pose{T}(x, y, z, ϕ, χ, ψ) where {T<:AbstractFloat}
     )
 end
 
+function Pose(x::U, y::U, z::U, ϕ::V, χ::V, ψ::V) where {U,V}
+    T = typeof(sin(ϕ))
+    return Pose{T}(x, y, z, ϕ, χ, ψ)
+end
 
-Pose(x::T, y::T, z::T, ϕ::T, χ::T, ψ::T) where {T} = Pose{T}(x, y, z, ϕ, χ, ψ)
-Pose(x, y, z, ϕ, χ, ψ) = Pose(promote(x, y, z, ϕ, χ, ψ)...)
+Pose(x, y, z, ϕ, χ, ψ) = Pose(promote(x, y, z)..., promote(ϕ, χ, ψ)...)
 Pose(; x, y, z, yaw, pitch, roll) = Pose(x, y, z, yaw, pitch, roll)
