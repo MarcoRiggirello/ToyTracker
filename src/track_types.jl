@@ -2,8 +2,6 @@
 
 abstract type AbstractParticleTrack end
 
-#function (t::AbstractParticleTrack)(τ::Real)::GlobalCoordinates end
-#function direction(t::AbstractParticleTrack, τ::Real)::GlobalDirection end
 
 ##########################
 #     Straight track     #
@@ -48,62 +46,11 @@ end
 ########################
 #     Helix track      #
 # (tracker simulation) #
-#################
+########################
 struct HelixTrack{T,Η,Φ,L} <: AbstractParticleTrack
-    q_over_p::T  # Charge over momentum (curvature)
+    q_over_ρ::T  # Charge over curvature
     η::Η         # Pseudorapidity
     ϕ::Φ         # Azimuthal angle in radians
     d0::L        # Transverse impact parameter
     z0::L        # Longitudinal impact parameter
 end
-
-# Implement the functor method for HelixTrack
-#=
-function (track::HelixTrack)(τ::Real)
-    # Extract parameters
-    q_over_p = track.q_over_p
-    η = track.η
-    ϕ = track.ϕ
-    d0 = track.d0
-    z0 = track.z0
-
-    # Compute curvature
-    curvature = abs(q_over_p)  # [GeV/c]^-1
-    sinλ = sinh(η)
-
-    # Compute transverse momentum direction
-    px = cos(ϕ)
-    py = sin(ϕ)
-
-    # Compute the position at parameter τ
-    x = d0 * (-py) + (1 / curvature) * (px * sin(curvature * τ) - py * (1 - cos(curvature * τ)))
-    y = d0 * px + (1 / curvature) * (py * sin(curvature * τ) + px * (1 - cos(curvature * τ))
-    z = z0 + τ * tanh(η)
-
-    # Return GlobalCoordinates in cm (strip units for compatibility)
-    return GlobalCoordinates(ustrip(cm, x), ustrip(cm, y), ustrip(cm, z))
-end
-
-# Implement the direction method for HelixTrack (without normalization)
-function direction(track::HelixTrack, τ::Real)
-    # Extract parameters
-    q_over_p = track.q_over_p
-    η = track.η
-    ϕ = track.ϕ
-
-    # Compute curvature
-    curvature = abs(q_over_p)  # [GeV/c]^-1
-
-    # Compute transverse momentum direction
-    px = cos(ϕ)
-    py = sin(ϕ)
-
-    # Compute the direction vector components
-    dx_dτ = px * cos(curvature * τ) + py * sin(curvature * τ)
-    dy_dτ = py * cos(curvature * τ) - px * sin(curvature * τ)
-    dz_dτ = tanh(η)
-
-    # Return GlobalDirection (without normalization)
-    return GlobalDirection(ustrip(dx_dτ), ustrip(dy_dτ), ustrip(dz_dτ))
-end#######
-=#
