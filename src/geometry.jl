@@ -1,41 +1,62 @@
 # Marco Riggirello
 
-Base.:*(p::Pose, c::LocalVector) = GlobalVector(SMatrix(p) * SVector(c))
-
-function Base.inv(p::Pose)
+#########
+# SE(3) #
+#########
+# Implementation of the properties of a group
+# Note: one(Pose) comes gratis from the FieldArray implementation!
+function Base.inv(p::Pose{T}) where {T}
     dx = p.rotxx * p.trasx + p.rotyx * p.trasy + p.rotzx * p.trasz
     dy = p.rotxy * p.trasx + p.rotyy * p.trasy + p.rotzy * p.trasz
     dz = p.rotxz * p.trasx + p.rotyz * p.trasy + p.rotzz * p.trasz
-    return Pose(
+    return Pose{T}(
         SA[
             p.rotxx p.rotyx p.rotzx -dx
             p.rotxy p.rotyy p.rotzy -dy
             p.rotxz p.rotyz p.rotzz -dz
-            0       0       0         1
+            zero(T) zero(T) zero(T) oneunit(T)
         ]
     )
 end
 
-Base.:\(p::Pose, c::GlobalVector) = LocalVector(inv(p) * c) 
+Base.:∘(p1::Pose, p2::Pose) = p1 * p2
 
+#############################
+# CHANGE OF REFERENCE FRAME #
+#############################
+# Application of poses to global/local coordinates/directions
+# Since the Pose represents the active tranformation of a
+# detector plane, its direct application moves from local frame
+# to global frame. We decided to enforce this property in the
+# typing of base functions.
+function Base.:*(p::Pose, c::LocalCoordinates)
+    sp = SMatrix(p)
+    sc = SVector(c)
+    return GlobalCoordinates(sp * sc)
+end
+
+function Base.:\(p::Pose, c::GlobalCoordinates)
+    isp = SMatrix(inv(p))
+    sc = SVector(c)
+    return LocalCoordinates(isp * sc)
+end
 
 function Base.:*(p::Pose, d::LocalDirection)
-    rot = SA[
-        p.rotxx p.rotxy p.rotxz 0
-        p.rotyx p.rotyy p.rotyz 0
-        p.rotzx p.rotzy p.rotzz 0
-        0       0       0       1
-    ]
-    return GlobalDirection(rot * d)
+    sp = SMatrix(p)
+    sd = SVector(d)
+    return GlobalDirection(sp * sd)
 end
-
 
 function Base.:\(p::Pose, d::GlobalDirection)
-    invrot = SA[
-        p.rotxx p.rotyx p.rotzx 0
-        p.rotxy p.rotyy p.rotzy 0
-        p.rotxz p.rotyz p.rotzz 0
-        0       0       0       1
-    ]
-    return LocalDirection(invrot * d)
+    isp = SMatrix(inv(p))
+    sd = SVector(d)
+    return LocalDirection(isp * sd)
 end
+
+
+# Functor interface. Will it work? Only time will tell
+(p::Pose)(c::LocalCoordinates) = p * c
+(p::Pose)(c::GlobalCoordinates) = p \ c
+
+(p::Pose)(d::LocalDirection) = p * d
+(p::Pose)(d::GlobalDirection) = p \ d
