@@ -57,6 +57,9 @@ for name in (:GlobalCoordinates, :LocalCoordinates, :GlobalDirection, :LocalDire
         # Vector constructors
         $(name){T}(a::AbstractVector) where {T} = $(name){T}(a...)
         $(name)(a::AbstractVector) = $(name)(a...)
+        # Special handle for override StaticArray ambiguity
+        $(name){T}(a::StaticArray{S,U,1}) where {S<:Tuple,T,U} = $(name){T}(a...)
+        $(name)(a::StaticArray{S,T,1}) where {S<:Tuple,T} = $(name){T}(a...)
     end
 end
 
@@ -101,11 +104,17 @@ struct Pose{T} <: FieldMatrix{4,4,T}
         xz, yz, zz, # is transposed w.r.t.
         xt, yt, zt  # the true order!!!
     ) where {T}
+        #        return new{T}(
+        #            xx, xy, xz, xt, # See?
+        #            yx, yy, yz, yt, # This is the
+        #            zx, zy, zz, zt, # true ordering!!!
+        #            zero(T), zero(T), zero(T), oneunit(T)
+        #        )
         return new{T}(
-            xx, xy, xz, xt, # See?
-            yx, yy, yz, yt, # This is the
-            zx, zy, zz, zt, # true ordering!!!
-            zero(T), zero(T), zero(T), oneunit(T)
+            xx, yx, zx, zero(T), # CAVE! The "graphical"
+            xy, yy, zy, zero(T), # order of the elements
+            xz, yz, zz, zero(T), # is transposed w.r.t.
+            xt, yt, zt, oneunit(T)  # the true order!!!
         )
     end
 end
@@ -165,7 +174,7 @@ function Pose{T}(
     )
 end
 
-function Pose{T}(
+function Pose(
     xx::T, yx::T, zx::T, tx::T, # CAVE! The "graphical"
     xy::T, yy::T, zy::T, ty::T, # order of the elements
     xz::T, yz::T, zz::T, tz::T, # is transposed w.r.t.
@@ -196,13 +205,11 @@ function Pose(
 end
 
 # Matrix constructors
-function Pose{T}(a::AbstractMatrix) where {T}
-    return Pose{T}(a...)
-end
-
-function Pose(a::AbstractMatrix)
-    return Pose(a...)
-end
+Pose{T}(a::AbstractMatrix) where {T} = Pose{T}(a...)
+Pose(a::AbstractMatrix) = Pose(a...)
+# Special handle for override StaticArray ambiguity
+Pose{T}(a::StaticArray{S,U,2}) where {S<:Tuple,T,U} = Pose{T}(a...)
+Pose(a::StaticArray{S,T,2}) where {S<:Tuple,T} = Pose{T}(a...)
 
 
 # Parametric constructors
@@ -241,3 +248,4 @@ end
 
 Pose(x::T, y::T, z::T, ϕ::T, χ::T, ψ::T) where {T} = Pose{T}(x, y, z, ϕ, χ, ψ)
 Pose(x, y, z, ϕ, χ, ψ) = Pose(promote(x, y, z, ϕ, χ, ψ)...)
+Pose(; x, y, z, yaw, pitch, roll) = Pose(x, y, z, yaw, pitch, roll)
