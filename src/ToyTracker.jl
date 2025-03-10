@@ -1,6 +1,6 @@
 module ToyTracker
 
-using StaticArrays
+using LinearAlgebra, StaticArrays
 using Makie
 
 greet() = print("Toy model of a particle tracker to create toy MC for alignment studies.")
@@ -8,18 +8,19 @@ greet() = print("Toy model of a particle tracker to create toy MC for alignment 
 include("geometry_types.jl")
 include("track_types.jl")
 include("detector_types.jl")
-#include("utils.jl")
 include("geometry.jl")
 include("intersection.jl")
+include("interaction.jl")
 include("display.jl")
 
 export LocalCoordinates, GlobalCoordinates
 export LocalDirection, GlobalDirection
 export Pose
-export StraightTrack
-#export SiliconSensor, PlacedSensor, Tracker
-#export Cluster, Hit
-#
-#export interaction
+export AbstractParticleTrack, StraightTrack
+export AbstractSiliconSensor, IdealSensor
+export PlacedSensor
+export AbstractParticleMeasurement, Hit
 
-end # module ToyTracker
+export intersection, interaction
+
+end

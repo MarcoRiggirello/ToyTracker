@@ -25,7 +25,7 @@ StraightTrack(x0::T, y0::T, z0::T, mx::T, my::T, mz::T) where {T} = StraightTrac
 StraightTrack(x0, y0, z0, mx, my, mz) = StraightTrack(promote(x0, y0, z0, mx, my, mz)...)
 
 # four elements definitions
-StraightTrack{T}(x0::T, y0::T, mx::T, my::T) where {T} = StraightTrack{T}(x0, y0, oneunit(T), mx, my, oneunit(T))
+StraightTrack{T}(x0::T, y0::T, mx::T, my::T) where {T} = StraightTrack{T}(x0, y0, zero(T), mx, my, oneunit(T))
 StraightTrack(x0::T, y0::T, mx::T, my::T) where {T} = StraightTrack{T}(x0, y0, mx, my)
 StraightTrack(x0, y0, mx, my) = StraightTrack(promote(x0, y0, mx, my)...)
 
