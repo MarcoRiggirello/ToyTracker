@@ -3,8 +3,8 @@
 # This is the most trivial interaction possible:
 # just a signal in the closest pixel and that's it.
 function interaction(s::IdealSensor, i::LocalCoordinates)
-    Lu, Lv = s.uwidth, s.vwidth
-    Δu, Δv = s.upitch, s.vpitch
+    Lu, Lv = sensorsize(s)
+    Δu, Δv = pixelsize(s)
 
     i_u, i_v = i.u, i.v
 
