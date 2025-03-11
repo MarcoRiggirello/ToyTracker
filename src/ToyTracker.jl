@@ -23,5 +23,6 @@ export PlacedSensor
 export AbstractParticleMeasurement, Hit
 
 export intersection, interaction
+export two_sides_colors
 
 end
