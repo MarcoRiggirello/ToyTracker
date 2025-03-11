@@ -30,23 +30,39 @@ function generate_mesh_faces(Nu, Nv)
     # Faces on the positive side of detector
     positive_indices = [i + j for i in i_range for j in j_range]
     # Lower triangles
-    positive_faces_1 = [i + k for i in positive_indices, k in (0, 2Nv, 2)]
+    positive_faces_1 = [p + k for p in positive_indices, k in (0, 2Nv, 2)]
     # Upper triangles
-    positive_faces_2 = [i + k for i in positive_indices, k in (2Nv, 2Nv + 2, 2)]
+    positive_faces_2 = [p + k for p in positive_indices, k in (2Nv, 2Nv + 2, 2)]
     # Total
     positive_faces = [positive_faces_1; positive_faces_2]
     # Faces on the negative side of detector
-    # Lower triangles
     negative_indices = [i + j + 1 for i in i_range for j in j_range]
-    negative_faces_1 = [i + k for i in negative_indices, k in (0, 2, 2Nv)]
+    # Lower triangles
+    negative_faces_1 = [n + k for n in negative_indices, k in (0, 2, 2Nv)]
     # Upper triangles
-    negative_faces_2 = [i + k for i in negative_indices, k in (2Nv + 2, 2, 2Nv)]
+    negative_faces_2 = [n + k for n in negative_indices, k in (2Nv + 2, 2, 2Nv)]
     # Total
     negative_faces = [negative_faces_1; negative_faces_2]
     # Now the edges of the sensor. The black magic
     # is of the same kind, mutatis mutandis.
+    # West
+    west_faces_1 = [i + k for i in i_range, k in (1, 0, 3)]
+    west_faces_2 = [i + k for i in i_range, k in (0, 2, 3)]
+    west_faces = [west_faces_1; west_faces_2]
+    # East
+    east_faces_1 = [i + k + 2Nv * (Nu - 1) for i in i_range, k in (0, 1, 3)]
+    east_faces_2 = [i + k + 2Nv * (Nu - 1) for i in i_range, k in (0, 3, 2)]
+    east_faces = [east_faces_1; east_faces_2]
+    # South
+    south_faces_1 = [i + k + 1 for i in j_range, k in (0, 1, 2Nv + 1)]
+    south_faces_2 = [i + k + 1 for i in j_range, k in (0, 2Nv + 1, 2Nv)]
+    south_faces = [south_faces_1; south_faces_2]
+    # North
+    north_faces_1 = [i + k + 1 + 2(Nv - 1) for i in j_range, k in (0, 2Nv + 1, 1)]
+    north_faces_2 = [i + k + 1 + 2(Nv - 1) for i in j_range, k in (0, 2Nv, 2Nv + 1)]
+    north_faces = [north_faces_1; north_faces_2]
     # Grand total
-    return [positive_faces; negative_faces]
+    return [positive_faces; negative_faces; west_faces; east_faces; south_faces; north_faces]
 end
 
 function local_sensor_mesh(s::IdealSensor)
