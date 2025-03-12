@@ -1,6 +1,7 @@
 module ToyTracker
 
 using LinearAlgebra, StaticArrays
+import GeometryBasics: Point3
 using MakieCore
 
 greet() = print("Toy model of a particle tracker to create toy MC for alignment studies.")
@@ -12,6 +13,7 @@ include("utils.jl")
 include("geometry.jl")
 include("intersection.jl")
 include("interaction.jl")
+include("io.jl")
 include("display.jl")
 
 export LocalCoordinates, GlobalCoordinates

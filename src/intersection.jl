@@ -9,5 +9,5 @@ function intersection(t::StraightTrack, p::Pose)
         @warn "The detector plane is parallel to the track."
     end
     τ = -l_pos.w / l_dir.w
-    return t(τ)
+    return t(τ), direction(t, τ)
 end

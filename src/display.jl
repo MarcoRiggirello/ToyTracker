@@ -2,12 +2,8 @@ function tracklines(t::AbstractParticleTrack, τ_range::AbstractRange)
     # Sample the track at multiple τ values
     positions = [t(τ) for τ in τ_range]
 
-    # Extract x, y, z coordinates from the positions
-    x = [p.x for p in positions]
-    y = [p.y for p in positions]
-    z = [p.z for p in positions]
-
-    return x, y, z
+    points = [Point3(p.x, p.y, p.z) for p in positions]
+    return (points,)
 end
 
 MakieCore.convert_arguments(P::Type{<:Lines}, t::AbstractParticleTrack, τ_range::AbstractRange) = tracklines(t, τ_range)
