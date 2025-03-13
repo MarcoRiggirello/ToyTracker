@@ -66,7 +66,7 @@ function local_sensor_mesh(s::IdealSensor)
     Lu, Lv = sensorsize(s)
     urange = LinRange(-Lu / 2, Lu / 2, Nu)
     vrange = LinRange(-Lv / 2, Lv / 2, Nv)
-    thickness = 0.1pixelsize(s)[1] # cheat to make different color work
+    thickness = 1.e-3Lv # cheat to make different color work
     vertices = [LocalCoordinates(u, v, w) for u in urange for v in vrange for w in (zero(thickness), -thickness)]
     faces = generate_mesh_faces(Nu, Nv)
     return vertices, faces
