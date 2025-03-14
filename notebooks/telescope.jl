@@ -13,11 +13,13 @@ begin
     Pkg.activate(Base.current_project())
     Pkg.instantiate()
 	using ToyTracker, WGLMakie, FileIO
+	WGLMakie.activate!()
+	Makie.inline!(true)
 end
 
 # ╔═╡ 61d51130-00fa-43af-894c-cf433f7e33fd
 md"""
-# A simple cosmic ray telescope event generation with idealized setup
+# A simple particle telescope event generation
 """
 
 # ╔═╡ 088eafbb-312c-4b7c-a0f1-2e1634175434
@@ -28,10 +30,10 @@ To simulate a particle tracker and its response to the passage of a particle, we
 - How does the particle move?
 - What is a sensor?
 - Where are the sensors?
-- Where the particle passed?
+- Where does the particle cross the sensor?
 - How does the sensor respond to a particle passing through it?
 
-Thus, before moving to the actual generation, I will quickly review all the components needed answer to the very five questions above.
+Thus, before moving to the actual generation, I will quickly review all the components needed to answer to the very five questions above.
 """
 
 # ╔═╡ 7c5e5dc6-8e72-4904-9c99-5011cd2b6903
@@ -136,7 +138,7 @@ p1(gcoord)
 
 # ╔═╡ 13fa5e68-184d-4fa4-8c03-b6d5934a90dd
 md"""
-With a slight abuse of notation, vectors of type `Direction` are defined in order to represent, of course, directions that have to rotate but not to translate. Their fourth component is then null:
+With a slight abuse of notation, vectors of type `Direction` are defined in order to represent, as the name suggests, directions which they have the properties of not being affected by translation. Their fourth component is then null:
 
 $\tilde{\mathbf{x}}=\begin{bmatrix}
 x \\
@@ -249,9 +251,93 @@ As for the placed sensors case, we can visualize the track:
 # ╔═╡ 11139ded-32f7-4528-87c4-2ff6ebe8fd50
 lines(t1, 0:1)
 
+# ╔═╡ df84c218-bd59-4c36-a2a8-5b9fcdd479d5
+md"""
+### Particle interaction with the sensor
+"""
+
+# ╔═╡ aa718b7a-89a4-41d2-b1af-ac15c9f0e0ee
+md"""
+The interaction of a straight track with an ideal sensor is quite simple:
+- The intersection of the sensor plane with the track happens for the value of $\tau$ such that the $w$ component of $Tf(\tau)$ is null;
+- Given the local coordinates of intersection, the measurement correspond to the center of the closest pixel.
+
+The return type is a `Hit` made of the $(u,v)$ coordinates of the center and their covariance matrix. This is unnecessary for the present situation since the  2d measurement uncertainty is diagonal, but it leaves the door open to more advanced model of detector response!
+"""
+
+# ╔═╡ e0ff714d-8a8a-4b81-8fb6-174328e0669f
+interaction(t1, ps1)
+
+# ╔═╡ 8ba962ef-d6d3-4fe1-a85c-f5d282182a16
+md"""
+## Telescope simulation
+"""
+
+# ╔═╡ 0e40773c-3c61-45e0-ae63-fae010f02cfb
+md"""
+Now we are ready to "build" our telescope. First, we define our set of poses:
+"""
+
+# ╔═╡ 74d2f9a0-d466-4a63-a990-11b950694036
+begin
+	xpos = [0., 0.1, 0.]
+	ypos = [0.,-0.2, 0.]
+	zpos = [10., 20., 30.]
+	pxposes = [Pose(x=x, y=y, z=z, yaw=0, pitch=0, roll=0) for (x,y,z) in zip(xpos, ypos, zpos)]
+	stposes = [Pose(x=x, y=y, z=z+0.4, yaw=0, pitch=0, roll=0) for (x,y,z) in zip(xpos, ypos, zpos)]
+end
+
+# ╔═╡ 1a5098d5-5a20-4ae7-b0af-38ecfc5ff707
+md"""
+Then our placed sensors:
+"""
+
+# ╔═╡ d81c513a-35eb-48e9-a7cd-33de43c6e8ac
+begin
+	pixels = [PlacedSensor(pixel, p) for p in pxposes]
+	strips = [PlacedSensor(strip, p) for p in stposes]
+end
+
+# ╔═╡ 408bc1f1-815c-47f2-b9c1-b89f13c9b773
+md"""
+And finally our telescope! Which is simply a tuple of placed sensors:
+"""
+
+# ╔═╡ d614121c-f06c-46c6-9ff7-e142b742c777
+telescope = Tuple(Iterators.flatten(zip(pixels, strips)))
+
+# ╔═╡ 7358312b-909f-40bf-9789-95dfd686f634
+begin
+	fig1 = Figure()
+	ax1 = Axis3(fig1[1,1], viewmode=:fit)
+	for p in telescope
+		mesh!(ax1, p, color=color, alpha=.5)
+	end
+	fig1
+end
+
+# ╔═╡ 9737c598-37a0-4056-af87-e56c5f614c40
+md"""
+Now we can generate a beam of straight tracks to generate synthetic data: here as example we choose a gaussian beam spot with 3 cm sigma on the $x$ axis and 2 cm sigma in the $y$ axis, with an angular divergence of around 14 mrad.
+"""
+
+# ╔═╡ c608d304-6f6d-4bca-bd24-1a44cd383d06
+begin
+	fig2 = Figure()
+	ax2 = Axis3(fig2[1,1], viewmode=:free)
+	for _ in 1:30
+		t = StraightTrack(3randn(), 2randn(), 1e-2randn(), 1e-2randn())
+		lines!(ax2, t, 0:40)
+	end
+	for p in telescope
+		mesh!(ax2, p, color=color, alpha=.5)
+	end
+	fig2
+end
+
 # ╔═╡ Cell order:
-# ╠═3d8ac329-b4ef-43eb-be79-53678efaea8d
 # ╟─61d51130-00fa-43af-894c-cf433f7e33fd
+# ╠═3d8ac329-b4ef-43eb-be79-53678efaea8d
 # ╟─088eafbb-312c-4b7c-a0f1-2e1634175434
 # ╟─7c5e5dc6-8e72-4904-9c99-5011cd2b6903
 # ╟─d200b5e9-40ea-4b73-9aca-f95a6f9609ce
@@ -284,3 +370,16 @@ lines(t1, 0:1)
 # ╠═c4dc1e8f-a9bf-44d9-8117-4afcd8f344db
 # ╟─a9da4e95-cfd8-4928-8511-1fcb3ba3a52c
 # ╠═11139ded-32f7-4528-87c4-2ff6ebe8fd50
+# ╟─df84c218-bd59-4c36-a2a8-5b9fcdd479d5
+# ╟─aa718b7a-89a4-41d2-b1af-ac15c9f0e0ee
+# ╠═e0ff714d-8a8a-4b81-8fb6-174328e0669f
+# ╟─8ba962ef-d6d3-4fe1-a85c-f5d282182a16
+# ╟─0e40773c-3c61-45e0-ae63-fae010f02cfb
+# ╠═74d2f9a0-d466-4a63-a990-11b950694036
+# ╟─1a5098d5-5a20-4ae7-b0af-38ecfc5ff707
+# ╠═d81c513a-35eb-48e9-a7cd-33de43c6e8ac
+# ╟─408bc1f1-815c-47f2-b9c1-b89f13c9b773
+# ╠═d614121c-f06c-46c6-9ff7-e142b742c777
+# ╠═7358312b-909f-40bf-9789-95dfd686f634
+# ╟─9737c598-37a0-4056-af87-e56c5f614c40
+# ╠═c608d304-6f6d-4bca-bd24-1a44cd383d06
