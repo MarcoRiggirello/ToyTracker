@@ -1,4 +1,4 @@
-module ToyTracker
+module TrackerAlignment
 
 using LinearAlgebra, StaticArrays
 import GeometryBasics: Point3

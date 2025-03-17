@@ -1,6 +1,6 @@
-name = "ToyTracker"
+name = "TrackerAlignment"
 uuid = "11baac9c-e0e1-41eb-9148-4989610249ad"
-authors = ["mriggire <marco.riggirello@cern.ch>"]
+authors = ["Marco Riggirello <marco.riggirello@cern.ch>"]
 version = "0.1.0"
 
 [deps]

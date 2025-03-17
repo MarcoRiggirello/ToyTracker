@@ -12,7 +12,7 @@ begin
 	using Pkg
     Pkg.activate(Base.current_project())
     Pkg.instantiate()
-	using ToyTracker, WGLMakie, FileIO
+	using TrackerAlignment, WGLMakie, FileIO
 	WGLMakie.activate!()
 	Makie.inline!(true)
 end
