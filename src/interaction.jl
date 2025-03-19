@@ -14,8 +14,8 @@ function interaction(s::IdealSensor, i::LocalCoordinates, _::LocalDirection)
         return missing
     end
 
-    u = (i_u ÷ Δu) * Δu + Δu / 2
-    v = (i_v ÷ Δv) * Δv + Δv / 2
+    u = (i_u ÷ Δu) * Δu + sign(i_u) * Δu / 2
+    v = (i_v ÷ Δv) * Δv + sign(i_v) * Δv / 2
 
     m = SA[u, v]
     Σ = SA[Δu^2/12 0; 0 Δv^2/12]
