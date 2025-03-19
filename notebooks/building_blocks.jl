@@ -12,19 +12,19 @@ begin
 	using Pkg
     Pkg.activate(Base.current_project())
     Pkg.instantiate()
-	using TrackerAlignment, WGLMakie, FileIO
+	using TrackerAlignment, WGLMakie
 	WGLMakie.activate!()
 	Makie.inline!(true)
 end
 
 # ╔═╡ 61d51130-00fa-43af-894c-cf433f7e33fd
 md"""
-# A simple particle telescope event generation
+# Building blocks for tracking
 """
 
 # ╔═╡ 088eafbb-312c-4b7c-a0f1-2e1634175434
 md"""
-In this notebook we want to introduce the ergonomics of the `ToyTracker` experimental package as well as generating some synthetic data for track-based alignment studies.
+In this notebook we want to introduce the ergonomics of the `TrackerAlignment` experimental package.
 
 To simulate a particle tracker and its response to the passage of a particle, we need to know five things:
 - How does the particle move?
@@ -33,7 +33,7 @@ To simulate a particle tracker and its response to the passage of a particle, we
 - Where does the particle cross the sensor?
 - How does the sensor respond to a particle passing through it?
 
-Thus, before moving to the actual generation, I will quickly review all the components needed to answer to the very five questions above.
+Thus I will quickly review all the components needed to answer to the very five questions above.
 """
 
 # ╔═╡ 7c5e5dc6-8e72-4904-9c99-5011cd2b6903
@@ -222,7 +222,8 @@ z(\tau) \\
 
 The homogeneous coordinates convention comes very handy when it comes to computing the direction of the particle, defined as the Jacobian of $f$ with respect to $\tau$:
 
-$d(\tau)=\begin{bmatrix}
+$d(\tau)=
+\partial_\tau f(\tau) = \begin{bmatrix}
 x'(\tau) \\
 y'(\tau) \\
 z'(\tau) \\
@@ -318,7 +319,7 @@ end
 
 # ╔═╡ 9737c598-37a0-4056-af87-e56c5f614c40
 md"""
-Now we can generate a beam of straight tracks to generate synthetic data: here as example we choose a gaussian beam spot with 3 cm sigma on the $x$ axis and 2 cm sigma in the $y$ axis, with an angular divergence of around 14 mrad.
+Now we can generate a beam of straight tracks to see how they intersect the detector: here as example we choose a gaussian beam spot with 3 cm sigma on the $x$ axis and 2 cm sigma in the $y$ axis, with an angular divergence of around 14 mrad.
 """
 
 # ╔═╡ c608d304-6f6d-4bca-bd24-1a44cd383d06
