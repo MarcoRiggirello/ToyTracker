@@ -8,7 +8,7 @@ function pixelsize(s::IdealSensor)
 end
 
 function two_sides_colors(s::AbstractSiliconSensor, frontsidecolor=:salmon, backsidecolor=:orange)
-    vertices, _ = local_sensor_mesh(s)
+    vertices = local_sensor_vertices(s)
     N = length(vertices)
     return [i % 2 == 0 ? backsidecolor : frontsidecolor for i in 1:N]
 end
